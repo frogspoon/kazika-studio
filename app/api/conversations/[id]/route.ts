@@ -62,7 +62,8 @@ export async function GET(
       .from('conversation_messages')
       .select(`
         *,
-        character:character_sheets(id, name, image_url)
+        character:character_sheets(id, name, image_url),
+        scenes:conversation_scenes(*)
       `)
       .eq('conversation_id', id)
       .order('sequence_order', { ascending: true });

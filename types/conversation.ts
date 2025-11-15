@@ -40,6 +40,16 @@ export interface ConversationGenerationLog {
   created_at: string;
 }
 
+export interface ConversationScene {
+  id: number;
+  message_id: number;
+  scene_description: string;
+  scene_order: number;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CharacterSheet {
   id: number;
   name: string;
@@ -99,6 +109,7 @@ export interface ConversationMessageWithCharacter extends ConversationMessage {
     name: string;
     image_url: string | null;
   } | null;
+  scenes?: ConversationScene[];
 }
 
 export interface RegenerateMessageRequest {

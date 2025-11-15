@@ -207,6 +207,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Save scenes to conversation_scenes table
+    const scenesToInsert = messages
+      .map((msg, idx) => {
+        const sceneDescription = parsed.messages[idx]?.scene;
+        if (!sceneDescription) return null;
+
+        return {
+          message_id: msg.id,
+          scene_description: sceneDescription,
+          scene_order: 0,
+          metadata: {}
+        };
+      })
+      .filter(scene => scene !== null);
+
+    if (scenesToInsert.length > 0) {
+      const { error: sceneError } = await supabase
+        .from('conversation_scenes')
+        .insert(scenesToInsert);
+
+      if (sceneError) {
+        console.error('Failed to save scenes:', sceneError);
+        // Don't rollback, just log the error - scenes are optional
+      } else {
+        console.log(`Successfully saved ${scenesToInsert.length} scenes`);
+      }
+    }
+
     // Save generation log
     await supabase.from('conversation_generation_logs').insert({
       conversation_id: conversation.id,

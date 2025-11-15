@@ -256,7 +256,31 @@ function SortableMessage({
             >
               {message.message_text}
             </Typography>
-            {message.metadata?.scene && (
+            {/* Display scene from conversation_scenes table */}
+            {message.scenes && message.scenes.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                {message.scenes.map((scene) => (
+                  <Typography
+                    key={scene.id}
+                    variant="body2"
+                    sx={{
+                      mt: 0.5,
+                      padding: 1.5,
+                      backgroundColor: 'action.hover',
+                      borderRadius: 1,
+                      fontStyle: 'italic',
+                      color: 'text.secondary',
+                      borderLeft: '3px solid',
+                      borderColor: 'primary.main'
+                    }}
+                  >
+                    🎬 {scene.scene_description}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+            {/* Fallback: Display scene from metadata if no scenes table entry */}
+            {(!message.scenes || message.scenes.length === 0) && message.metadata?.scene && (
               <Typography
                 variant="body2"
                 sx={{
