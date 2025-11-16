@@ -255,55 +255,46 @@ export function extractFormFieldsFromNodes(nodes: Node[]): FormFieldConfig[] {
       }
     }
 
-    // Geminiノード
+    // Geminiノード - getNodeTypeConfig()から設定を取得して使用
     if (nodeType === 'gemini') {
-      const fieldName = `gemini_prompt_${node.id}`;
-      if (!addedFieldNames.has(fieldName)) {
-        fields.push({
-          type: 'textarea',
-          name: fieldName,
-          label: `${nodeName} プロンプト`,
-          placeholder: node.data.config?.prompt || 'Geminiへの指示を入力',
-          required: false,
-          rows: 4,
-          helperText: `${nodeName}で使用するプロンプト`,
-        });
-        addedFieldNames.add(fieldName);
-      }
+      const nodeConfig = getNodeTypeConfig('gemini');
+
+      nodeConfig.fields.forEach((field) => {
+        const fieldName = `gemini_${field.name}_${node.id}`;
+
+        if (!addedFieldNames.has(fieldName)) {
+          fields.push({
+            ...field,
+            name: fieldName,
+            label: `${nodeName} ${field.label}`,
+            placeholder: node.data.config?.[field.name] || field.placeholder,
+            helperText: field.helperText,
+          });
+          addedFieldNames.add(fieldName);
+        }
+      });
     }
 
-    // Nanobanaノード
+    // Nanobanaノード - getNodeTypeConfig()から設定を取得
     if (nodeType === 'nanobana') {
-      // プロンプト入力
-      const promptFieldName = `nanobana_prompt_${node.id}`;
-      if (!addedFieldNames.has(promptFieldName)) {
-        fields.push({
-          type: 'textarea',
-          name: promptFieldName,
-          label: `${nodeName} プロンプト`,
-          placeholder: node.data.config?.prompt || '画像生成の指示を入力',
-          required: true,
-          rows: 4,
-          helperText: `${nodeName}で使用するプロンプト（必須）`,
-        });
-        addedFieldNames.add(promptFieldName);
-      }
+      const nodeConfig = getNodeTypeConfig('nanobana');
 
-      // キャラクターシート選択（最大4つ）
-      const characterSheetFieldName = `nanobana_characterSheets_${node.id}`;
-      if (!addedFieldNames.has(characterSheetFieldName)) {
-        fields.push({
-          type: 'characterSheets',
-          name: characterSheetFieldName,
-          label: `${nodeName} キャラクターシート`,
-          required: false,
-          maxSelections: 4,
-          helperText: `${nodeName}で使用するキャラクターシート（最大4つ）`,
-        });
-        addedFieldNames.add(characterSheetFieldName);
-      }
+      nodeConfig.fields.forEach((field) => {
+        const fieldName = `nanobana_${field.name}_${node.id}`;
 
-      // 参照画像アップロード（最大4つ）
+        if (!addedFieldNames.has(fieldName)) {
+          fields.push({
+            ...field,
+            name: fieldName,
+            label: `${nodeName} ${field.label}`,
+            placeholder: node.data.config?.[field.name] || field.placeholder,
+            helperText: field.helperText,
+          });
+          addedFieldNames.add(fieldName);
+        }
+      });
+
+      // 参照画像アップロード（最大4つ） - 特別な処理が必要なため個別に追加
       const referenceImagesFieldName = `nanobana_referenceImages_${node.id}`;
       if (!addedFieldNames.has(referenceImagesFieldName)) {
         fields.push({
@@ -318,24 +309,27 @@ export function extractFormFieldsFromNodes(nodes: Node[]): FormFieldConfig[] {
       }
     }
 
-    // Higgsfieldノード
+    // Higgsfieldノード - getNodeTypeConfig()から設定を取得
     if (nodeType === 'higgsfield') {
-      const fieldName = `higgsfield_prompt_${node.id}`;
-      if (!addedFieldNames.has(fieldName)) {
-        fields.push({
-          type: 'textarea',
-          name: fieldName,
-          label: `${nodeName} プロンプト`,
-          placeholder: node.data.config?.prompt || '動画生成の指示を入力',
-          required: false,
-          rows: 4,
-          helperText: `${nodeName}で使用するプロンプト`,
-        });
-        addedFieldNames.add(fieldName);
-      }
+      const nodeConfig = getNodeTypeConfig('higgsfield');
+
+      nodeConfig.fields.forEach((field) => {
+        const fieldName = `higgsfield_${field.name}_${node.id}`;
+
+        if (!addedFieldNames.has(fieldName)) {
+          fields.push({
+            ...field,
+            name: fieldName,
+            label: `${nodeName} ${field.label}`,
+            placeholder: node.data.config?.[field.name] || field.placeholder,
+            helperText: field.helperText,
+          });
+          addedFieldNames.add(fieldName);
+        }
+      });
     }
 
-    // Seedream4ノード
+    // Seedream4ノード - プロンプトのみ（まだgetNodeTypeConfigに定義がない場合）
     if (nodeType === 'seedream4') {
       const fieldName = `seedream4_prompt_${node.id}`;
       if (!addedFieldNames.has(fieldName)) {
@@ -384,53 +378,24 @@ export function extractFormFieldsFromNodes(nodes: Node[]): FormFieldConfig[] {
       }
     }
 
-    // ElevenLabsノード
+    // ElevenLabsノード - getNodeTypeConfig()から設定を取得して使用
     if (nodeType === 'elevenlabs') {
-      // テキスト入力フィールド
-      const textFieldName = `elevenlabs_text_${node.id}`;
-      if (!addedFieldNames.has(textFieldName)) {
-        fields.push({
-          type: 'textarea',
-          name: textFieldName,
-          label: `${nodeName} テキスト`,
-          placeholder: node.data.config?.text || '音声に変換するテキストを入力',
-          required: false,
-          rows: 4,
-          helperText: `${nodeName}で音声に変換するテキスト`,
-        });
-        addedFieldNames.add(textFieldName);
-      }
+      const nodeConfig = getNodeTypeConfig('elevenlabs');
 
-      // 音声ID選択フィールド
-      const voiceIdFieldName = `elevenlabs_voiceId_${node.id}`;
-      if (!addedFieldNames.has(voiceIdFieldName)) {
-        fields.push({
-          type: 'select',
-          name: voiceIdFieldName,
-          label: `${nodeName} 音声ID`,
-          required: false,
-          helperText: 'ElevenLabsの音声を選択（プリセット音声）',
-          options: ELEVENLABS_PRESET_VOICES.map(voice => ({
-            label: voice.label,
-            value: voice.value,
-          })),
-        });
-        addedFieldNames.add(voiceIdFieldName);
-      }
+      nodeConfig.fields.forEach((field) => {
+        const fieldName = `elevenlabs_${field.name}_${node.id}`;
 
-      // モデルID選択フィールド
-      const modelIdFieldName = `elevenlabs_modelId_${node.id}`;
-      if (!addedFieldNames.has(modelIdFieldName)) {
-        fields.push({
-          type: 'select',
-          name: modelIdFieldName,
-          label: `${nodeName} モデル`,
-          required: false,
-          helperText: 'ElevenLabsの音声生成モデルを選択（Turbo v2.5推奨、v3は要アクセス権）',
-          options: ELEVENLABS_MODEL_OPTIONS,
-        });
-        addedFieldNames.add(modelIdFieldName);
-      }
+        if (!addedFieldNames.has(fieldName)) {
+          fields.push({
+            ...field,
+            name: fieldName,
+            label: `${nodeName} ${field.label}`,
+            placeholder: node.data.config?.[field.name] || field.placeholder,
+            helperText: field.helperText,
+          });
+          addedFieldNames.add(fieldName);
+        }
+      });
     }
   });
 
