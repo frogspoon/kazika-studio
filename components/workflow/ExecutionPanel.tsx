@@ -30,8 +30,8 @@ import ErrorIcon from '@mui/icons-material/Error';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
-import { executeWorkflow } from '@/lib/workflow/executor';
-import { ExecutionResult, topologicalSort } from '@/lib/workflow/types';
+import type { ExecutionResult } from '@/lib/workflow/types';
+import { topologicalSort } from '@/lib/workflow/types';
 import FindInLogsToolbar from './FindInLogsToolbar';
 import { highlightText, countMatches } from '@/lib/utils/highlightText';
 
@@ -107,6 +107,14 @@ export default function ExecutionPanel({ nodes, edges, onSave, currentWorkflowId
     setNodeStatuses(initialStatuses);
 
     try {
+      // TODO: executeWorkflow を API route 経由で呼び出すように変更する必要があります
+      // 現在は Client Component から直接 executor をインポートできないため、
+      // 一時的にエラーを表示します
+      setError('ワークフローの実行機能は現在利用できません。API route 経由での実行に移行中です。');
+      setIsExecuting(false);
+
+      // 以下は元のコード（コメントアウト）
+      /*
       const result = await executeWorkflow(nodes, edges, (nodeId, status, executionResult) => {
         setNodeStatuses((prev) => {
           const newStatuses = new Map(prev);
@@ -139,6 +147,7 @@ export default function ExecutionPanel({ nodes, edges, onSave, currentWorkflowId
         // ワークフロー実行成功後、アウトプットをDBに保存
         await saveOutputsToDatabase(result.results, currentWorkflowId);
       }
+      */
     } catch (error: any) {
       setError(error.message);
     } finally {

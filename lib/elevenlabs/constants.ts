@@ -23,11 +23,11 @@ export const ELEVENLABS_PRESET_VOICES = [
  * 利用可能なモデル一覧
  */
 export const ELEVENLABS_MODELS = [
-  { label: 'Turbo v2.5 (推奨・バランス型)', value: 'eleven_turbo_v2_5', recommended: true },
-  { label: 'Flash v2.5 (超高速・低コスト)', value: 'eleven_flash_v2_5', recommended: false },
-  { label: 'Multilingual v2 (安定)', value: 'eleven_multilingual_v2', recommended: false },
-  { label: 'Turbo v2 (高速)', value: 'eleven_turbo_v2', recommended: false },
-  { label: 'Monolingual v1 (英語のみ)', value: 'eleven_monolingual_v1', recommended: false },
+  { label: 'Turbo v2.5 (推奨・バランス型)', value: 'eleven_turbo_v2_5', recommended: true, requiresAccess: false },
+  { label: 'Flash v2.5 (超高速・低コスト)', value: 'eleven_flash_v2_5', recommended: false, requiresAccess: false },
+  { label: 'Multilingual v2 (安定)', value: 'eleven_multilingual_v2', recommended: false, requiresAccess: false },
+  { label: 'Turbo v2 (高速)', value: 'eleven_turbo_v2', recommended: false, requiresAccess: false },
+  { label: 'Monolingual v1 (英語のみ)', value: 'eleven_monolingual_v1', recommended: false, requiresAccess: false },
   { label: 'Eleven v3 (最高品質・Alpha・要アクセス権)', value: 'eleven_v3', recommended: false, requiresAccess: true },
 ] as const;
 
