@@ -14,6 +14,27 @@ DBへのマイグレーションやdeleteは確認なしで行わないでくだ
 
 ## 最近の主要な変更
 
+### 2025-01-16: ワークフロー実行のAPI経由化とビルドエラー修正
+
+**目的**: Client Component から Node.js モジュールを直接インポートすることによるビルドエラーを解決し、ワークフロー実行を適切にAPI経由で行う
+
+**変更内容**:
+- `/app/api/workflows/execute-draft/route.ts` を新規作成し、現在編集中のワークフローを実行するAPIエンドポイントを追加
+- `/components/workflow/ExecutionPanel.tsx` を修正し、`executor.ts` の直接インポートを削除、API経由で実行するように変更
+- `/next.config.ts` に Turbopack 設定と `serverExternalPackages` を追加し、Node.js モジュールのバンドルエラーを解決
+- `/components/workflow/ElevenLabsNodeSettings.tsx` を `UnifiedNodeSettings` を使用するように簡素化（約370行 → 約20行）
+- TypeScript エラーを修正（`lib/elevenlabs/constants.ts`, `app/api/workflows/execute/route.ts`, `lib/workflow/executor.ts`）
+
+**技術的詳細**:
+- Client Component から `@google-cloud/storage`, `pg` などの Node.js 専用モジュールを間接的にインポートしていたため、Turbopack ビルドで `child_process`, `fs`, `dns` などが解決できないエラーが発生
+- `serverExternalPackages` 設定により、これらのパッケージをサーバーサイド専用として扱うように指定
+- webpack の fallback 設定で、クライアントサイドでは Node.js モジュールを `false` に設定
+
+**影響範囲**:
+- ワークフロー実行がAPI経由になったため、サーバーサイドで適切に Node.js 機能を使用可能
+- ビルドが成功し、本番環境へのデプロイが可能に
+- ExecutionPanel の実行フローは維持されつつ、アーキテクチャが改善
+
 ### 2025-01-XX: ワークフローノード設定フォームの共通化
 
 **目的**: コードの重複を削減し、保守性と拡張性を向上

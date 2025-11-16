@@ -107,49 +107,63 @@ export default function ExecutionPanel({ nodes, edges, onSave, currentWorkflowId
     setNodeStatuses(initialStatuses);
 
     try {
-      // TODO: executeWorkflow を API route 経由で呼び出すように変更する必要があります
-      // 現在は Client Component から直接 executor をインポートできないため、
-      // 一時的にエラーを表示します
-      setError('ワークフローの実行機能は現在利用できません。API route 経由での実行に移行中です。');
-      setIsExecuting(false);
+      // API経由でワークフローを実行
+      const response = await fetch('/api/workflows/execute-draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nodes,
+          edges,
+        }),
+      });
 
-      // 以下は元のコード（コメントアウト）
-      /*
-      const result = await executeWorkflow(nodes, edges, (nodeId, status, executionResult) => {
+      const data = await response.json();
+
+      if (!data.success) {
+        setError(data.error || data.details || 'ワークフローの実行に失敗しました');
+        return;
+      }
+
+      // API レスポンスから結果を復元
+      const resultsMap = new Map<string, ExecutionResult>();
+
+      Object.entries(data.outputs || {}).forEach(([nodeName, output]: [string, any]) => {
+        const nodeId = output.nodeId;
+        resultsMap.set(nodeId, {
+          nodeId: nodeId,
+          success: output.success,
+          output: output.output,
+          error: output.error,
+          requestBody: output.requestBody,
+        });
+
+        // 各ノードの状態を更新
         setNodeStatuses((prev) => {
           const newStatuses = new Map(prev);
-          newStatuses.set(nodeId, status);
+          newStatuses.set(nodeId, output.success ? 'completed' : 'failed');
           return newStatuses;
         });
 
-        // 処理が完了したノードの結果を即座に表示
-        if ((status === 'completed' || status === 'failed') && executionResult) {
-          setResults((prev) => {
-            const newResults = new Map(prev);
-            newResults.set(nodeId, executionResult);
-            return newResults;
-          });
-
-          // 処理が完了したノードを自動的に展開
-          setExpandedNodes((prev) => {
-            const newExpanded = new Set(prev);
-            newExpanded.add(nodeId);
-            return newExpanded;
-          });
-        }
+        // 完了したノードを自動的に展開
+        setExpandedNodes((prev) => {
+          const newExpanded = new Set(prev);
+          newExpanded.add(nodeId);
+          return newExpanded;
+        });
       });
 
-      setResults(result.results);
+      setResults(resultsMap);
 
-      if (!result.success) {
-        setError(result.error || 'ワークフローの実行に失敗しました');
-      } else {
-        // ワークフロー実行成功後、アウトプットをDBに保存
-        await saveOutputsToDatabase(result.results, currentWorkflowId);
+      // ワークフロー実行成功後、アウトプットをDBに保存
+      if (currentWorkflowId) {
+        await saveOutputsToDatabase(resultsMap, currentWorkflowId);
       }
-      */
+
     } catch (error: any) {
-      setError(error.message);
+      console.error('Failed to execute workflow:', error);
+      setError(error.message || 'ワークフローの実行中にエラーが発生しました');
     } finally {
       setIsExecuting(false);
     }
