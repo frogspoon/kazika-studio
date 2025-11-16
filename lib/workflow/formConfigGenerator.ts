@@ -1,6 +1,6 @@
 import { Node } from 'reactflow';
 import { FormFieldConfig } from '@/components/form/DynamicFormField';
-import { ELEVENLABS_PRESET_VOICES, ELEVENLABS_MODELS_FOR_FORM } from '@/lib/elevenlabs/constants';
+import { ELEVENLABS_PRESET_VOICES, ELEVENLABS_MODEL_OPTIONS } from '@/lib/elevenlabs/constants';
 
 /**
  * ノードタイプごとの設定フィールド定義
@@ -119,14 +119,7 @@ export function getNodeTypeConfig(nodeType: string): NodeTypeConfig {
             name: 'modelId',
             label: 'モデル',
             required: false,
-            options: [
-              { label: 'Turbo v2.5 (推奨・バランス型) ⭐', value: 'eleven_turbo_v2_5' },
-              { label: 'Flash v2.5 (超高速・低コスト)', value: 'eleven_flash_v2_5' },
-              { label: 'Multilingual v2 (安定)', value: 'eleven_multilingual_v2' },
-              { label: 'Turbo v2 (高速)', value: 'eleven_turbo_v2' },
-              { label: 'Monolingual v1 (英語のみ)', value: 'eleven_monolingual_v1' },
-              { label: 'Eleven v3 (最高品質・Alpha・要アクセス権)', value: 'eleven_v3' },
-            ],
+            options: ELEVENLABS_MODEL_OPTIONS,
             helperText: 'Turbo v2.5推奨（バランス型）、v3は最高品質だが要アクセス権',
           },
           {
@@ -433,11 +426,8 @@ export function extractFormFieldsFromNodes(nodes: Node[]): FormFieldConfig[] {
           name: modelIdFieldName,
           label: `${nodeName} モデル`,
           required: false,
-          helperText: 'ElevenLabsの音声生成モデルを選択',
-          options: ELEVENLABS_MODELS_FOR_FORM.map(model => ({
-            label: model.label,
-            value: model.value,
-          })),
+          helperText: 'ElevenLabsの音声生成モデルを選択（Turbo v2.5推奨、v3は要アクセス権）',
+          options: ELEVENLABS_MODEL_OPTIONS,
         });
         addedFieldNames.add(modelIdFieldName);
       }
